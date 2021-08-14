@@ -6,11 +6,11 @@
 /*   By: chly-huc <chly-huc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/13 18:47:07 by chly-huc          #+#    #+#             */
-/*   Updated: 2021/08/13 22:18:19 by chly-huc         ###   ########.fr       */
+/*   Updated: 2021/08/14 23:05:41 by chly-huc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "pipex.h"
+#include "../include/pipex.h"
 
 char	*ft_search_path(t_sh *sh, char *str)
 {
@@ -55,40 +55,37 @@ void	get_all_path(t_sh *sh, char **env)
 	}
 }
 
-int pipe_engine(t_sh *sh)
+int	pipe_engine(t_sh *sh)
 {
-	
-	int pid;
+	int	pid;
+
 	if (pipe(sh->pipe_fd) == -1)
 		error(sh, PIPE_ERROR, NULL);
-	if ((pid = fork()) == -1)
+	pid = fork();
+	if (pid == -1)
 		strerror(errno);
 	if (pid == 0)
-	{
-		return(1);
-	}
+		return (1);
 	else
-	{
-		return(2);
-	}
+		return (2);
 }
 
-void setup(t_sh *sh, char **env, char **argv)
+void	setup(t_sh *sh, char **env, char **argv)
 {
 	int	fd;
-	int pid;
-	
+	int	pid;
+
 	fd = 0;
 	sh->env = env;
+	if (!sh->env)
+		error(sh, ENV_ERROR, NULL);
 	get_all_path(sh, env);
 	if (!sh->all_path)
 		error(sh, PATH_ERROR, NULL);
-	sh->str1 = argv[2];
-	sh->str2 = argv[3];
 	sh->fd_in = open(argv[1], O_RDONLY);
 	if (sh->fd_in == -1)
 		error(sh, OPEN_ERROR, argv[1]);
-	sh->fd_out = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
+	sh->fd_out = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0666);
 	if (fd == -1)
 		error(sh, OPEN_ERROR, argv[4]);
 	pid = pipe_engine(sh);
@@ -101,16 +98,17 @@ void setup(t_sh *sh, char **env, char **argv)
 	else
 		wait(0);
 }
-int main(int argc, char **argv, char **env)
-{
-	t_sh *sh;
 
-	sh = ft_malloc_sh();
-	if (!sh)
-		return (0);
+int	main(int argc, char **argv, char **env)
+{
+	t_sh	*sh;
+
 	if (argc != 5)
-		error(sh, ARGC, NULL);
+		exit(0);
+	sh = ft_malloc_sh(argv);
+	if (!sh)
+		error(sh, MALLOC_ERROR, NULL);
 	setup(sh, env, argv);
 	free_engine(sh);
-	return(1);
+	return (1);
 }

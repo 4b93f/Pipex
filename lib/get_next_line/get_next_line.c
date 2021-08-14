@@ -6,13 +6,13 @@
 /*   By: chly-huc <chly-huc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/11/12 14:48:49 by chly-huc          #+#    #+#             */
-/*   Updated: 2021/07/23 16:47:57 by chly-huc         ###   ########.fr       */
+/*   Updated: 2021/04/23 16:47:17 by chly-huc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int		find_end_string(char *str)
+int	find_end_string(char *str)
 {
 	int	i;
 
@@ -41,7 +41,8 @@ char	*get_l(char *string)
 		return (NULL);
 	while (string[i] && string[i] != '\n')
 		i++;
-	if (!(ligne = ft_substr1(string, 0, i)))
+	ligne = ft_substr1(string, 0, i);
+	if (!ligne)
 		return (NULL);
 	while (j < i)
 	{
@@ -52,16 +53,18 @@ char	*get_l(char *string)
 	return (ligne);
 }
 
-char	*read_line(int fd, char *string)
+char	*readline(int fd, char *string)
 {
 	char	*buf;
 	int		ret;
 
-	ret = 0;
-	if (!(buf = malloc(sizeof(char) * BUFFER_SIZE + 1)))
+	ret = 1;
+	buf = malloc(sizeof(char) * BUFFER_SIZE + 1);
+	if (!buf)
 		return (NULL);
-	while ((ret = read(fd, buf, BUFFER_SIZE)) > 0)
+	while (ret > 0)
 	{
+		ret = read(fd, buf, BUFFER_SIZE);
 		buf[ret] = '\0';
 		string = ft_strjoin1(string, buf);
 		if (find_end_string(buf))
@@ -79,7 +82,8 @@ char	*rest(char *strings)
 
 	j = 0;
 	i = 0;
-	if (!(tmp = malloc(sizeof(char) * ft_strlen1(strings))))
+	tmp = malloc(sizeof(char) * ft_strlen1(strings));
+	if (!tmp)
 		return (NULL);
 	if (!strings)
 		return (NULL);
@@ -95,14 +99,14 @@ char	*rest(char *strings)
 	return (tmp);
 }
 
-int		get_next_line(int fd, char **line)
+int	get_next_line(int fd, char **line)
 {
-	static	char	*str = NULL;
+	static char	*str = NULL;
 
 	*line = NULL;
 	if (check_error(fd, str) < 0 || BUFFER_SIZE < 1)
 		return (-1);
-	str = read_line(fd, str);
+	str = readline(fd, str);
 	*line = get_l(str);
 	if (!find_end_string(str))
 	{
